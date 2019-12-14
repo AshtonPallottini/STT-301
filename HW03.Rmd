@@ -1,0 +1,142 @@
+---
+title: "HW 03"
+author: "Ashton Pallottini, Nick Kurtansky, Kean Cruz, Cate Capiak"
+date: "October 25, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, warning=F}
+library(tidyverse)
+library(stringr)
+library(ggplot2)
+```
+
+###Question 1
+
+####Part a
+
+```{r, cache=TRUE}
+tb.cases <- read.csv("tb_cases.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE)
+tb.cases <- as_tibble(tb.cases)
+tb.cases
+```
+
+####Part b
+
+```{r}
+tb.cases1 <- gather(data = tb.cases[], key = diag, value = cases, na.rm = TRUE, -country, -iso2, -iso3, -year)
+tb.cases1
+```
+
+####Part c
+
+```{r}
+tb.cases2 <- mutate(tb.cases1, diag = str_replace(diag, "newrel", "new_rel"))
+table(tb.cases2$diag)
+tb.cases2
+tail(tb.cases2)
+```
+
+####Part d
+
+```{r}
+tb.cases3 <- separate(data = tb.cases2, col = diag, into = c("new", "type", "sex.age"), sep = "_")
+tb.cases3
+```
+
+####Part e
+
+```{r}
+tb.cases4 <- tb.cases3[,c(1, 4, 6:8)]
+tb.cases4
+```
+
+####Part f
+
+```{r}
+tb.cases5 <- separate(tb.cases4, col = sex.age, into = c("sex", "age"), sep = 1)
+tb.cases5 
+```
+
+####Part g
+
+```{r}
+tb.cases6 <- tb.cases5[,c(1,2,5,4,3,6)]
+tb.cases6
+```
+
+####Part h
+
+```{r}
+tb.cases6 <- mutate_if(tb.cases6, is.character, as.factor)
+
+```
+
+###Question 2
+
+####Part a
+
+```{r}
+tb.cases6 %>% group_by(age,sex) %>% summarize(count = sum(cases))
+```
+
+####Part b
+
+```{r}
+#India in 2007 had the most tb cases
+tb.cases6 %>% group_by(country, year) %>% summarize(count = sum(cases)) %>% arrange(desc(count))
+```
+
+####Part c
+
+```{r}
+tb.cases6 %>% filter(year > 2009) %>% group_by(year, type) %>% summarize(count = sum(cases))
+```
+
+####Part d
+
+```{r}
+tb.cases6 %>% filter(country == "India") %>% group_by(year) %>% filter(cases == max(cases)) %>% arrange(desc(year))
+```
+
+###Question 3
+
+```{r}
+#Plot A
+tb.cases7 <- tb.cases6 %>% group_by(age) %>% summarize(total.cases = sum(cases))
+
+ggplot(tb.cases7, aes(x = age, y = total.cases)) + geom_bar(stat = "identity", color = "black", fill = "lightblue") + labs(x = "Age Group", y = "Total Cases", title = "Total Tuberculosis Cases for Each Age Group", subtitle = "Worldwide Cases") + geom_hline(yintercept = mean(tb.cases7$total.cases), color = "red", linetype = "dashed") + geom_text(x = 1, y = 6.50*10^6, label = "Mean TB Cases", size = 2.5)
+```
+
+A question that arises is whether or not Plot A would change if we used per capita data instead of total cases. We believe that this graph peaks in the middle ages due to there being more people in those age groups than there are in the younger and older groups. In general, younger children and the elderly are more susceptible to diseases, so we would anticipate per capita cases to be higher in the tails of the graph. In short, we believe a per capita tuberculosis graph separated by age would be very different than a total tuberculosis cases by age graph. 
+
+```{r}
+#Plot B
+tb.cases8 <- tb.cases6 %>% filter(year == 2012) %>% group_by(country, type) %>% summarise(total.cases = sum(cases))
+
+ggplot(data = tb.cases8, aes( x = type, y = total.cases)) + geom_boxplot(color = "black", fill = "lightblue") + coord_cartesian(ylim = c(0, 10000)) + labs(title = "Distribution of National TB Cases by Type", subtitle = "In 2012",x = "Type", y = "TB Cases")
+```
+
+Since each country has a different population, it would be worthwhile to calculate national TB cases per capita in order to truly gage the distribution of national TB prevalence.
+
+```{r}
+#Plot C
+tb.cases9 <- tb.cases6 %>% group_by(age,sex) %>% summarize(total.cases = sum(cases))
+
+ggplot(tb.cases9, aes(x = age:sex, y = total.cases)) + geom_bar(aes(fill = sex), stat = "identity", color = "black") + labs(x = "Sex", y = "Total Cases", title = "Total Tuberculosis Cases for Each Age Group by Sex", subtitle = "Worldwide Cases") + geom_hline(yintercept = mean(tb.cases9$total.cases), color = "red", linetype = "dashed") + geom_text(x = 1.5, y = 3.20*10^6, label = "Mean TB Cases", size = 2.5)
+```
+
+This plot follows up the tuberculosis cases by age group, by breaking it into male and female in those age groups. From the graph we can see that from each age group and over time into the older age groups males overwhelming outnumber females in contracting tuberculosis.
+
+```{r}
+#Plot D
+tb.cases10 <- tb.cases6 %>% filter(country == "India") %>% group_by(year) %>% summarize(total.cases = sum(cases))
+
+ggplot(tb.cases10,aes(x=year,y=total.cases))+geom_point()+scale_x_continuous(limits=c(1995,2012))+labs(x="Year", y="Total TB Cases", title="Total TB Cases Per Year in India")+ geom_hline(yintercept = mean(tb.cases10$total.cases), color = "red", linetype = "dashed")
+```
+
+Based off the data in Plot D one question we would be interested in further investigating is with the total TB cases rising each year from 1995-2007 and staying fairly high til 2012, the question we have is whether or not the trends of high total TB cases raises or lowers from 2013-present.  With the world continously innovating and finding new cures with all the technlogy and all, we assume for the rate to go down, but with the trends from graph D we feel as if there was not a significant drop from 2012, if there was one.

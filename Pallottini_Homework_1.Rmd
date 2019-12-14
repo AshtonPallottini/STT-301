@@ -1,0 +1,194 @@
+---
+title: "STT 301 Homework Assignment 1"
+author: "Ashton Pallottini"
+date: "September 11, 2017"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Question 1 (3 points)
+
+#### Part a (1 point)
+```{r}
+nums <- c(1:7)
+charnums <- c("1","2","3","4")
+mixed <- c(charnums, "a", "b")
+```
+
+
+#### Part b (1 point)
+```{r}
+NumsCharacter <- as.character(nums)
+NumsCharacter
+
+NumsLogical <- as.logical(nums)
+NumsLogical
+
+CharnumsNum <- as.numeric(charnums)
+CharnumsNum
+
+MixedNum <-  as.numeric(mixed)
+MixedNum
+```
+
+#### Part c (1 point)
+```{r}
+NumsFirst <- nums[1]
+NumsFirst
+
+NumsLast <- nums[length(nums)]
+NumsLast
+
+NumsMinusFirst <- nums[2:length(nums)]
+NumsMinusFirst
+
+NumsWithoutFour <- nums[3:(length(nums) - 2)]
+NumsWithoutFour
+```
+
+
+### Question 2 (4 points)
+```{r, cache = TRUE, comment = NA}
+load("baseball.Rdata")
+ls()
+```
+
+#### Part a (1 point)
+```{r}
+redsox1971 <- subset(batting_stats, teamID == "BOS" & yearID == 1971)
+dim(redsox1971)
+```
+
+#### Part b (1 point)
+```{r}
+redsoxPlayerName <-  redsox1971$playerName
+
+redsox1971BA <-  redsox1971$BA
+redsox1971BA
+
+redsox1971HR <-  redsox1971$HR
+redsox1971HR
+
+redsox1971SB <-  redsox1971$SB
+redsox1971SB
+```
+
+
+#### Part c (1 point)
+```{r}
+max(redsox1971HR)
+WhoMaxHR <-  redsoxPlayerName[which.max(redsox1971HR)]
+WhoMaxHR
+mean(redsox1971HR)
+
+max(redsox1971BA)
+WhoMaxBA <-  redsoxPlayerName[which.max(redsox1971BA)]
+WhoMaxBA
+mean(redsox1971BA)
+
+max(redsox1971SB)
+WhoMaxSB <-  redsoxPlayerName[which.max(redsox1971SB)]
+WhoMaxSB
+mean(redsox1971SB)
+```
+
+#### Part d (1 point)
+```{r}
+cor(redsox1971HR, redsox1971BA) #Measures the correlation between the two variables
+
+plot(redsox1971HR, redsox1971BA) #Makes a scatterplot of the two variables with HRs on the x-axis and BA on the y-axis
+```
+
+We can see that there really isn't much of a linear relationship at all between BA and HR on this team. The correlation value is about .04 which is incredibly small, indicating that there isn't a linear relationship between these two variables. The plot shows a large cluster of values at zero HRs, with one outlier up at a BA of 1. This is likely someone that did not see many at-bats, but converted all the ones he did see. Without this outlier, the correlation would likely be much higher, as the other points lay on a relatively straight, horizontal line at about BA = .200. It would appear that as HRs increase, BA doesn't change much at all for all the other non-outlier batters.
+
+### Question 3 (3 points)
+
+
+According to https://www.baseball-reference.com/leagues/MLB/2011-standings.shtml, the year 2011 was one that saw the Philadelphia Phillies lead the MLB with a win percentage of .630 and the Houston Astros lag behind the rest of the league with a win percentage of .346. In order to compare the statistical success of these two teams, I think it would be best to examine Runs, OPS, and IBB. Runs show us who had the more prolific offense. OPS shows us who had the hotter all-around batting and on-base capabilities. IBB shows us who had more feared batters. First, let us extract data for each team.
+
+
+```{r, comment = NA}
+Phillies2011 <- subset(batting_stats, teamID == "PHI" & yearID == 2011) #Take the subset of batting_stats that is the Phillies in 2011 and assign it to a variable
+
+Astros2011 <- subset(batting_stats, teamID == "HOU" & yearID == 2011) #Take the subset of batting_stats that is the Astros in 2011 and assign it to a variable
+```
+
+
+Some of the data appears to be missing from some of the players' OPS stat lines, so we will remove those points right now so we can run our analyses.
+
+
+```{r}
+Phillies2011 <- Phillies2011[-c(1,3,14,17,20,23,24,25,29,30,38,39),] #Remove missing data points from the Phillies
+
+Astros2011 <- Astros2011[-c(13,14,15,26,33,34,35,38,43,46,47),] #Remove missing data from the Astros
+```
+
+
+Next, lets extract data on Runs from each team. We will compare the sum of the runs to see which team had a better offense. We will also compare the mean and standard deviation of the runs to see who had a better and deeper roster.
+
+
+```{r}
+Astros2011R <-  Astros2011$R #Extracts and assigns runs for Astros
+Phillies2011R <- Phillies2011$R #Extracts and assigns runs for Phillies
+
+Astros2011R
+Phillies2011R
+
+sum(Astros2011R) #Total sum of all Astros 2011 runs
+sum(Phillies2011R) #Total sum of all Phillies 2011 runs
+
+mean(Astros2011R) #Player average of Astros 2011 runs
+mean(Phillies2011R) #Player average of Phillies 2011 runs
+
+sd(Astros2011R) #Standard Deviation of Astros' players 2011 runs
+sd(Phillies2011R) #Standard Deviation of Phillies' players 2011 runs
+```
+
+
+As you can see, the Phillies had a higher total of runs and a higher mean of runs. This would indicate that they had, on average, better batters on their team. However, the Phillies also had a higher standard deviation, so their roster may not have benn quite as consistently talented top-to-bottom as the Astros.
+
+
+Next, we will extract data on OPS. We will compare the averages of the respective teams' OPS to see which group were better all-around hitters. We will also compare the max of each to see who had the best hitter.
+
+
+```{r}
+Astros2011OPS <- Astros2011$OPS #Extracts and assigns OPS for Astros
+Phillies2011OPS <-  Phillies2011$OPS #Extracts and assigns OPS for Phillies
+
+Astros2011OPS
+Phillies2011OPS
+
+mean(Astros2011OPS) #Player average of Phillies 2011 OPS
+mean(Phillies2011OPS) #Player average of Phillies 2011 OPS
+
+max(Astros2011OPS) #Highest of all players' OPS on 2011 Astros
+max(Phillies2011OPS) #Highest of all players' OPS on 2011 Phillies
+```
+
+This data shows us that the Astros were a better hitting team because they had batters who on average were better at slugging and getting on base. This could be impacted by the outlier that the Astros have that is equal to 3, as we would expect the Phillies to be better at hitting.
+
+Next we will extract data on IBB. We will look at the total for each team to see who had more feared hitters. We will also look at the max to see which team had the most feared star hitter.
+
+
+```{r}
+Astros2011IBB <- Astros2011$IBB #Extracts and assigns IBBs for Astros
+Phillies2011IBB <-  Phillies2011$IBB #Extracts and assigns IBBs for Phillies
+
+Astros2011IBB
+Phillies2011IBB
+
+sum(Astros2011IBB) #Total of all Astros' players 2011 IBBs
+sum(Phillies2011IBB) #Total of all Phillies' players 2011 IBBs
+
+max(Astros2011IBB) #Highest of all players' IBB on 2011 Astros
+max(Phillies2011IBB) #Highest of all players' IBB on 2011 Phillies
+```
+
+
+We can see that the Phillies had both a higher max and a higher sum of all IBBs. This would likely mean that the Phillies had more feared batters. Also, as the Phillies have the higher max, it would seem apparent that the Phillies have the more feared batter of the two teams.
+

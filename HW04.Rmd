@@ -1,0 +1,131 @@
+---
+title: "HW 04"
+author: "Ashton Pallottini, Yifei Yan, Emily Metcalf"
+date: "November 1, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(ggplot2)
+```
+
+
+###Question 1
+
+```{r}
+rbinom(10, size = 1000, p = .1)
+
+rpois(10, lambda = 100)
+
+rgeom(10, prob = .3)
+
+rexp(10, rate = .06)
+
+rt(10, df = 600, ncp = 5)
+```
+
+###Question 2
+
+```{r}
+one_die <- function(){
+  toss.result <- sample(c(1,2,3,4,5,6), 4, replace = TRUE)
+  if(6 %in% toss.result){
+    six.rolled <- TRUE
+  }
+  else{
+    six.rolled <- FALSE
+  }
+  return(six.rolled)
+}
+
+six.in.4.rolls <- replicate(100000, one_die())
+six.probability <- sum(six.in.4.rolls) / 100000
+six.probability
+```
+
+```{r}
+six_dice <- function(){
+  toss.list <- list()
+  sixes.rolled <- FALSE
+  for(i in 1:24){
+    toss.list[[i]] <- sample(c(1,2,3,4,5,6), 2, replace = TRUE)
+  }
+  for(element in toss.list){
+    if(sum(element) == 12){
+      sixes.rolled <- TRUE
+    }
+  }
+  return(sixes.rolled)
+}
+
+sixes.in.24.rolls <- replicate(100000, six_dice())
+sixes.probability <- sum(sixes.in.24.rolls) / 100000
+sixes.probability
+```
+
+###Question 3
+
+```{r}
+birthday_similar <- function(n){
+  birthdays <- sample(1:365, n, replace = TRUE)
+  if(length(unique(birthdays)) == length(birthdays)){
+    in.common <- FALSE
+  }
+  else{
+    in.common <- TRUE
+  }
+  return(in.common)
+}
+
+birthday.23.people <- replicate(100000, birthday_similar(23))
+prob.23.people <- sum(birthday.23.people) / 100000
+prob.23.people
+
+birthday.70.people <- replicate(100000, birthday_similar(70))
+prob.70.people <- sum(birthday.70.people) / 100000
+prob.70.people
+```
+
+```{r}
+people.prob.matrix <- matrix(nrow = 99, ncol = 2)
+colnames(people.prob.matrix) <- c("People", "Probability")
+for(i in 2:100){
+  birthday.i.people <- replicate(10000, birthday_similar(i))
+  prob.i.people <- sum(birthday.i.people) / 10000
+  people.prob.matrix[i - 1, 2] <- prob.i.people
+  people.prob.matrix[i - 1, 1] <- i
+}
+people.prob.df <- as.data.frame(people.prob.matrix)
+ggplot(data = people.prob.df, aes(x = People, y = Probability)) + geom_point() + labs(title = "Shared Birthday Probability for Different Sample Sizes", subtitle = "Samples from size 2 to 100", x = "Sample Size", y = "Probability")
+```
+
+###Question 4
+
+```{r}
+roulette_sim <- function(){
+  money <- 100
+  bet = 1
+  game.count <- 0
+  while(money > 0 & bet <= money){
+    win.or.loss <- sample(c(0,1), 1, replace = TRUE)
+    if(win.or.loss == 1){
+      money <- money + bet
+      bet <- 1
+    }
+    else{
+      money <- money - bet
+      bet <- bet * 2
+    }
+    game.count <- game.count + 1
+  }
+  return(game.count)
+}
+
+roulette.replications <- replicate(5000, roulette_sim())
+mean(roulette.replications)
+```
+

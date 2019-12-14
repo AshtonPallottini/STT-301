@@ -1,0 +1,203 @@
+---
+title: "STT 301 Homework Assignment 2"
+author: "Ashton Pallottini"
+date: "September 25, 2017"
+output:
+  html_document: default
+  pdf_document: default
+---
+```{r echo=FALSE, global_options}
+knitr::opts_chunk$set(comment = NA,tidy = TRUE)
+```
+
+
+```{r cache=TRUE}
+nypd <- read.csv(file="nypd_2016.csv", header = TRUE, stringsAsFactors = FALSE)
+```
+
+### Question 1 (3 points)
+
+#### Part a (0.25 points)
+```{r}
+#Creates a new data frame of specific variables from the data frame nypd and names it nypd.filter
+nypd.filter <- subset(nypd, select = c('pct', 'crimsusp', 'arstmade', 'sex', 'race', 'age', 'ht_feet', 'ht_inch', 'weight', 'build', 'xcoord', 'ycoord'))
+
+str(nypd.filter) #Displays the structure of nypd.filter
+```
+
+
+#### Part b (0.5 points)
+```{r}
+nypd.filter$age <- as.numeric(nypd.filter$age) #Converts the variable age to numeric
+str(nypd.filter) #Displays the new structure of nypd.filter
+```
+
+
+#### Part c (0.5 points)
+```{r}
+nypd.filter <- na.omit(nypd.filter) #Removes any row in nypd.filter with a 'NA' value
+dim(nypd.filter) #Displays dimensions of nypd.filter
+
+#Counts how many rows in nypd.filter and displays the last 6
+row.count <- nrow(nypd.filter) 
+nypd.filter[(row.count - 5) : row.count,]
+```
+
+
+#### Part d (0.25 points)
+```{r}
+table(nypd.filter$arstmade) #Table of arstmade
+table(nypd.filter$sex) #Table of sex
+table(nypd.filter$race) #Table of race
+```
+
+
+#### Part e (0.5 points)
+```{r}
+plot(as.factor(nypd.filter$race)) #Converts race to a factor and makes a bar plot of it
+plot(as.factor(nypd.filter$sex)) #Converts sex to a factor and makes a bar plot of it
+plot(as.factor(nypd.filter$pct))#Converts precinct to a factor and makes a bar plot of it
+```
+
+The bar plot on Race shows us that a vast plurality of people that were subjected to a SQF were black. Following this up closely are the white-hispanic group and then whites. The least common race was Native American.
+The bar plot on sex shows us that the vast majority of people that were subject to an SQF were male, followed by female, and then very few people of unknown sex.
+The bar plot on precinct shows us that the most SQFs happened in one of the precincts between 103 and 110. This precinct really sticks out from the others. Other than that, it appears that the SQFs were fairly evenly distributed between precinct.
+
+#### Part f (0.5 points)
+```{r}
+table(nypd.filter$sex, nypd.filter$race) #Creates two-way contigency table for sex and race
+table(nypd.filter$arstmade, nypd.filter$race) #Creates two-way contigency table for arstmade and race
+```
+
+The first table shows us once again that a vast majority of people in the data were male, and a plurality were black. It also displays how the most common person to be subjected to a SQF was a black male. Another interesting point is that if someone's race is unknown then their sex is likely to be unknown and vice versa. The ranges of observation span from 2 to 5841.
+The second table shows us that arrests are more likely to not be made in SQF situations. It also appears that the proportions of each race that gets arrested are approximately equal, with about .75-.80 people not being arrested in each race category. blacks make up both the most common SQF and the most common arrest made.
+
+#### Part g (0.5 points)
+```{r}
+mean.age <- mean(nypd.filter$age) #Compute and display average age
+mean.age
+median.age <- median(nypd.filter$age) #Compute and display median age
+median.age
+sd.age <- sd(nypd.filter$age) #Compute and display standard deviation of age
+sd.age
+hist(nypd.filter$age) #Creates histogram of the frequencies of age in the data set
+```
+
+The histogram shows us that the age of people subjected to a SQF is skewed right, meaning that people are more likely to be younger. It appears that the most commom age range for SQF was about 18-19 and there were very few people in their 70s or early teens to be subjected to an SQF. The maximum frequency appears to be at about 3000.
+
+### Question 2 (3 points)
+#### Part a (1 point)
+```{r}
+arrests.race <- nypd.filter$race[nypd.filter$arstmade == "Y"] #Assigns all data points in which an arrest was made to arrests.race
+table(arrests.race)/sum(table(arrests.race)) #Table of proportions of race given that an arrest was made
+
+arrests.sex <- nypd.filter$sex[nypd.filter$arstmade == "Y"] #Assigns all data points in which an arrest was made to arrests.sex
+table(arrests.sex)/sum(table(arrests.sex)) #Table of proportions of sex given that an arrest was made
+```
+
+
+#### Part b (1 point)
+```{r}
+mean(nypd.filter$age[nypd.filter$age >= 18]) #Mean age of adults subjected to SQF
+mean(nypd.filter$age[nypd.filter$sex == "M"]) #Mean age of males subjected to SQF
+mean(nypd.filter$age[nypd.filter$sex == "F"]) #Mean age of females subjected to SQF
+mean(nypd.filter$weight[nypd.filter$sex == "M"]) #Mean weight of males subjected to SQF
+mean(nypd.filter$weight[nypd.filter$sex == "F"]) #Mean weight of females subjected to SQF
+mean(nypd.filter$age[nypd.filter$pct == 106]) #Mean age of people subjected to SQF in precinct 106
+mean(nypd.filter$weight[nypd.filter$pct == 106 | nypd.filter$pct == 49]) #Mean weight of people subjected to SQF in precinct 106 or precinct 49
+```
+
+
+#### Part c (1 point)
+```{r}
+dwi.suspected <- nypd.filter$crimsusp[which(nypd.filter$crimsusp == "DWI" | nypd.filter$crimsusp == "D.W.I.")] #Stores all values in which the crimsusp was 'DWI' or 'D.W.I'
+length(dwi.suspected) #Gives how many people were suspected of DWI
+
+murder.suspected <- nypd.filter$crimsusp[which(nypd.filter$crimsusp == "MURDER")] #Stores all values in which crimsusp was 'MURDER'
+length(murder.suspected) #Gives how many people were suspected of murder
+
+murder.arrested <- nypd.filter$crimsusp[which(nypd.filter$crimsusp == "MURDER" & nypd.filter$arstmade == "Y")] #Stores all values in which murder was suspected and an arrest was made
+length(murder.arrested) #Gives how many people were arrested on suspicion of murder
+```
+
+
+### Question 3 (3 points)
+#### Part a (1.5 points)
+```{r, error = TRUE}
+feet.to.inches <- function(feet, inches){ #function takes in feet and inches
+  stopifnot(is.na(feet) == "FALSE", is.na(inches) == "FALSE", feet >= 0, inches >= 0) #checks to make sure no NA values or negative values are entered
+  total.inches <- 12*feet + inches #Converts feet and inches to inches and stores as total.inches
+  return(total.inches) #Returns total number of inches
+}
+```
+
+#### Part b (0.5 points)
+```{r}
+nypd.filter$ht_inch_total <- feet.to.inches(nypd.filter$ht_feet, nypd.filter$ht_inch) #Uses feet.to.inches to attach total height in inches to nypd.filter using height feet and height inches from nypd.filter
+```
+
+#### Part c (0.5 points)
+```{r}
+cor(nypd.filter$ht_inch_total, nypd.filter$weight) #Correlation between ht_inch_total and weight
+```
+
+#### Part d (0.5 points)
+```{r}
+plot(nypd.filter$ht_inch_total, nypd.filter$weight) #Scatterplot of total height in inches and weight with weight on the y-axis
+```
+
+The scatterplot shows that there isn't a very strong linear relationship between the two variables although there appears to be a slight positive correlation. It also shows some of the crazy outliers such as the person under 40 inches tall that is a 1000 on the scale.Most of the points appear to be at about 200 on the scale for weight and between 60 and 75 inches tall.
+
+### Question 4 (1 point)
+
+#### Part a (0.5 points)
+```{r}
+pct.df <- as.data.frame(table(nypd.filter$pct)) #Creates a data frame with column 1 as precinct number and column 2 as how many SQFs occurred in the corresponding precinct
+```
+
+#### Part b (0.25 points)
+```{r tidy=FALSE}
+nyc.precinct.plot <- function(df){ # load required packages
+    library(rgdal)
+    library(RColorBrewer)
+    library(classInt)
+      
+    # download precinct map
+    download.file("http://www.rob-barry.com/assets/data/mapping/nypp_15b.zip",destfile = "nypp_15b.zip")
+    unzip(zipfile = "nypp_15b.zip")
+    nypp <- readOGR("nypp_15b", "nypp")
+    
+{colnames(df) <- c("pct", "stops")}
+    
+    # create a sub function for merging data frames
+    merge.shpdf.df = function(shpdf, sub.df, by.shpdf, by.df) {
+    	shpdf@data <-
+    		data.frame(shpdf@data, sub.df[match(shpdf@data[, by.shpdf], sub.df[, by.df]), ])
+    	return(shpdf)
+    }
+    
+    # merge data frames using sub function
+    nypp.merge <- merge.shpdf.df(nypp, df, "Precinct", "pct")
+    
+    # create the plot
+    pal = brewer.pal(5, "YlOrRd")
+    fill.clr <- findColours(classIntervals(nypp.merge@data$stops, style = "pretty", n = 5), pal)
+    plot(nypp, col = fill.clr, main="Stop-Question-Frisk Incidents by Precinct")
+    legend(
+      "topleft",
+      fill=attr(fill.clr, "palette"),
+      legend=names(attr(fill.clr, "table")),
+      bty = "n"
+    )}
+```
+
+One of the problems with the above coding style is that the comments are not descriptive enough to actually explain what is going on. For example, one of the comments is simply "create the plot" which is used as a comment for 5-6 lines of unfamiliar code. This is problematic as someone who is unfamiliar with what is being done won't be able to figure it out, and if you leave and come back in a month you may not remember what is happening. A better way to comment would be to specify what is happening in as many lines as necessary, with more descriptive code than is currently used. A second problem is that the line `{colnames(df) <- c("pct", "stops")}` is not lined up correctly. It is within a function, so it should be four spaces indented as a necessary organization practice.
+
+#### Part c (0.25 points)
+```{r}
+nyc.precinct.plot(pct.df) #Uses the function nyc.precinct.plot to plot a heat map of SQF incidents in different precincts
+```
+  
+  The plot appears to be a heat map of how many SQF incidents there were in each precinct. It shows that the darker red a precinct is, the more SQFs it had, while the lighter yellow it is, the less SQFs it experienced. It appears that the maximum in a district was somewhere between 1200 and 1400 while the minimum was between 0 and 200. A lot more precincts were in the 0-200 range than the 1200-1400 range. In other words, the data appears skewed right. Only one precinct is in red, while there are many with varying shades of yellow. 
+  I think the plot could be improved by several minor changes. One way it could be changed is by making the shades differ more in color. I think this is fair as it helps the viewer more easily distinguish the differences between each precinct. I like that it gets darker as there are more SQFs, but it is difficult to tell SQF differences between each precinct. Another change is that major cities could be labeled. I think this goes a long way in explaining which precincts have more SQFs, as a larger population would lead to more SQFs. 
+
